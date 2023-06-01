@@ -4,98 +4,101 @@ __author__ = 'Joel McCune'
 __license__ = 'Apache 2.0'
 __copyright__ = 'Copyright 2023 by Joel McCune'
 
-__all__ = ['example_function', 'ExampleObject']
+__all__ = ['add_simpsons_diversity_index_feature_class', 'get_simpsons_diversity_index']
 
-# add specific imports below if you want to organize your code into modules, which is mostly what I do
-## from . import utils
-
-from typing import Union
+from typing import Union, List, Iterable
 from pathlib import Path
+import pkgutil
 
-import pandas as pd
+# provide variable indicating if arcpy is available
+has_arcpy: bool = pkgutil.find_loader('arcpy') is not None
 
 
-def example_function(in_path: Union[str, Path]) -> pd.DataFrame:
+def get_percent_of_n(n: Union[int, float], N: Union[int, float]) -> float:
+    p_n = 0.0 if n == 0 else float(n) / N
+    return p_n
+
+
+def get_simpsons_diversity_index(data: Iterable[Union[int, float]]) -> float:
     """
-    This is an example function, mostly to provide a template for properly
-    structuring a function and docstring for both you, and also for myself,
-    since I *almost always* have to look this up, and it's a *lot* easier
-    for it to be already templated.
+    Get the Simpson's Diversity Index based on input scalar values.
 
     Args:
-        in_path: Required path to something you really care about, or at least
-            want to exploit, a really big word used to simply say, *use*.
-
-    Returns:
-        Hypothetically, a Pandas Dataframe. Good luck with that.
+        data: Iterable of scalar values as either integers or floating point numbers.
 
     .. code-block:: python
 
-        from index_creation import example_function
+        # assuming all columns are to be used for the diversity index
+        df['simpsons_diversity_index'] = df.apply(lambda r:  get_simpsons_diversity_index(r), axis=1)
 
-        pth = r'C:/path/to/some/table.csv'
-
-        df = example_function(pth)
     """
-    return pd.read_csv(in_path)
+    # get the total population
+    N = sum(data)
+
+    # calculate simpson's diversity index using the helper function above
+    sd_idx = sum(get_percent_of_n(n, N)**2 for n in data if n != 0)
+
+    return sd_idx
 
 
-class ExampleObject(object):
+def add_simpsons_diversity_index_feature_class(
+        data: Union[str, Path, 'arcpy._mp.Layer'],
+        input_fields: List[str],
+        simpson_diversity_index_field: str = 'simpson_diversity_index'
+) -> Path:
     """
-    This is an example object, mostly to provide a template for properly
-    structuring a function and docstring for both you, and also for myself,
-    since I *almost always* have to look this up, and it's a *lot* easier
-    for it to be already templated.
+    Add a new column with Simpson's Diversity Index calculated from existing columns already existing in the dataset.
+
+    Args:
+        data: Feature Class to use as input for calculating Simpson's Diversity Index.
+        input_fields: Scalar fields (columns) in the input data to use for calculating the index.
+        simpson_diversity_index_field: Field to add to the Feature Class with Simpson's Diversity Index. The default is
+            ``simpson_diversity_index``.
+
+    ..note ::
+
+        If the output column already exists in the Feature Class, this function will throw an error to avoid overwriting
+        existing data.
     """
+    # ensure arcpy is available
+    if not has_arcpy:
+        raise EnvironmentError('ArcPy is required to execute the add_simpsons_diversity_index_feature_class function.')
+    else:
+        import arcpy
 
-    def __init__(self, *args, **kwargs):
+    # ensure, if a path is provided, it is converted to a string for arcpy functions
+    data = str(data) if isinstance(data, Path) else data
 
-        # is not applicable in all cases, but I always have to look it up, so it is here for simplicity's sake
-        super().__init__(*args, **kwargs)
+    # get a list of field names
+    obs_flds = [f.name for f in arcpy.ListFields(data)]
 
-    @staticmethod
-    def example_static_function(in_path: Union[str, Path]) -> pd.DataFrame:
-        """
-        This is an example function, mostly to provide a template for properly
-        structuring a function and docstring for both you, and also for myself,
-        since I *almost always* have to look this up, and it's a *lot* easier
-        for it to be already templated.
+    # check to ensure the column to be added, does not already exist
+    if simpson_diversity_index_field in obs_flds:
+        raise ValueError(f"It appears the field to be added for the Simpson's Diversity Index, "
+                         f"{simpson_diversity_index_field}, already exists in the Feature Class attribute table.")
 
-        Args:
-            in_path: Required path to something you really care about, or at least
-                want to exploit, a really big word used to simply say, *use*.
+    # ensure the source fields exist in the feature class
+    missing_cols = [c for c in input_fields if c not in obs_flds]
+    if len(missing_cols):
+        raise ValueError(f'Cannot locate all input_fields. Not detecting the following fields in the Feature Class - '
+                         f'{missing_cols}.')
 
-        Returns:
-            Hypothetically, a Pandas Dataframe. Good luck with that.
+    # add a new field for the new index
+    arcpy.management.AddField(data, field_name=simpson_diversity_index_field, field_type='FLOAT')
 
-        .. code-block:: python
+    # create an update cursor for index calculation
+    with arcpy.da.UpdateCursor(data, input_fields + [simpson_diversity_index_field]) as update_cursor:
 
-            from index_creation import ExampleObject
+        # iterate the rows
+        for r in update_cursor:
 
-            pth = r'C:/path/to/some/table.csv'
+            # using just the values from the input fields, calculate Simpson's Diversity Index
+            idx = get_simpsons_diversity_index(r[:-1])
 
-            df = ExampleObject.example_function(pth)
-        """
-        return pd.read_csv(in_path)
+            # populate the value for Simpson's Diversity Index
+            r[-1] = idx
 
-    @classmethod
-    def example_class_method(cls):
-        """
-        Class methods prove really useful for when you need a method to
-        return an instance of the parent class. Again, I usually  have to
-        search for how to do this, so I also just put it in here.
+            # write the update
+            update_cursor.updateRow(r)
 
-        Returns:
-            An instance of the class, duh!
-
-        .. code-block:: python
-
-            from from index_creation import ExampleObject
-
-            pth = r'C:/path/to/some/table.csv'
-
-            obj_inst = ExampleObject.example_class_method()
-
-            df = obj_inst.example_function(pth)
-        """
-        return cls()
+    return data
