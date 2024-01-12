@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?><messages><msg code="0" type="2">Start Time: 2 June 2023 09:43:32</msg><msg code="1" type="100">Traceback (most recent call last):
-  File "&lt;string&gt;", line 132, in execute
-  File "D:\projects\index-creation\src\index_creation\arcgis\__init__.py", line 187, in add_preconfigured_simpsons_diversity_index_feature_class
-    update_cur.updateRow(enrich_row)
-AttributeError: 'list' object has no attribute 'updateRow'
-</msg><msg code="-2147467259" type="100">Failed to execute (AddPreconfiguredSimpsonsDiversityIndex).</msg><msg code="0" type="3">Failed at 2 June 2023 09:43:39 (Elapsed Time: 7.89 seconds)</msg></messages>

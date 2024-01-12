@@ -1,51 +1,40 @@
-.. index-creation documentation master file.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-index-creation Documentation
+Simpson Index Documentation
 =============================================================================================================
 
-This documentation is generated from the template defined in ``./docsrc/source/index.rst``. This location and
-file is the place to start creating documentation for your project.
+Gini-Simpson Index
+------------------
 
-reStructured Text
------------------
+Simpson's Index of diversity quantifies the probability of two randomly selected single samples from a
+population will be the same. The formula for calculating Simpson's Index (:math:`D`) is:
 
-Since not everybody knows the reStructured Text syntax cold, it does help to have a good reference or two.
+.. math::
 
-* `reStructured Text Cheat Sheet`_
+   D = \frac {\displaystyle \sum n_i (n_i - 1)} {N (N - 1)}
 
-NBSphinx
---------
+:math:`n_i` = count in the category
 
-Since frequently Jupyter Notebooks are valuable documentation in themselves, using `NBSphinx`_ you can include
-them directly in the documentation. Just ensure you start the notebook with a markdown cell using a level one
-header (``# Level One Title``).
+:math:`N` = entire population count
+
+Applied to geographic analysis the entire population is the total count within a geographic area. In the United
+States, typically this is a standard Census geographic area such as a block group or tract. Within these
+geographic areas, the population is segmented into categories by some defining characteristic, with a count of
+the population assigned to each of the categories. This is
+
+Simpson's Index however, is somewhat counterintuitive. The lower the number, the higher the diversity.
+Consequently, typically Simpson's Index is calculated using the *Gini-Simpson Index* formula, calculating the
+*inverse* of Simpson's Index.
+
+.. math::
+
+   D = 1 - \left ( \frac {\displaystyle \sum n_i (n_i - 1)} {N (N - 1)} \right )
+
+The Gini-Simpson Index is the implementation in the tooling included with this package.
 
 Contents
 ========
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
 
-    Notebook Template <notebooks/notebook-template>
-
-index_creation
-================================
-
-Example using the `Sphinx Autodoc`_ extension to document the automatically included support library for this
-project located in ``./src/index_creation``.
-
-.. automodule:: index_creation
-    :members:
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-.. _reStructured Text Cheat Sheet: https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html
-.. _NBSphinx: https://nbsphinx.readthedocs.io/en/0.8.8/
-.. _Sphinx Autodoc: https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+    ArcGIS Pro Toolbox - Simpson Index Toolbox<simpson-index-toolbox>
+    API - Python Package Documentation<api-index-creation>

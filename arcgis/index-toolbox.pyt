@@ -82,6 +82,7 @@ class AddSimpsonsDiversityIndex(object):
 
         return
 
+
 class AddPreconfiguredSimpsonsDiversityIndex(object):
     def __init__(self):
         """Calculate Simpson's Diversity Index from existing fields."""
@@ -95,7 +96,7 @@ class AddPreconfiguredSimpsonsDiversityIndex(object):
             displayName='Features',
             name='features',
             datatype='GPFeatureLayer',
-            parameterType='Required',
+            parameterType='Optional',
             direction='Input'
         )
 
@@ -108,6 +109,16 @@ class AddPreconfiguredSimpsonsDiversityIndex(object):
         )
         index_name.filter.type = 'ValueList'
         index_name.filter.list = list(config.meta_variables.keys())
+        index_name.value = index_name.filter.list[0]
+
+        all_indices = arcpy.Parameter(
+            displayName='Add All Indices',
+            name='all_indices',
+            datatype='GPBoolean',
+            parameterType='Optional',
+            direction='Input',
+            category='Advanced'
+        )
 
         keep_enrich_fields = arcpy.Parameter(
             displayName='Keep Enrich Fields',
@@ -119,16 +130,41 @@ class AddPreconfiguredSimpsonsDiversityIndex(object):
         )
         keep_enrich_fields.value = False
 
-        params = [features, index_name, keep_enrich_fields]
+        params = [features, index_name, all_indices, keep_enrich_fields]
         return params
+
+    def updateParameters(self, parameters):
+
+        [_, index_name, all_indices, _] = parameters
+
+        # if all indices are modified
+        if all_indices.altered:
+
+            # if the value is true, disable the single value
+            if all_indices.value:
+                index_name.enabled = False
+
+            # if the value is false, enable the single value
+            else:
+                index_name.enabled = True
+
+        return
 
     def execute(self, parameters, messages):
         """The source code of the tool."""
         features = parameters[0].value
         index_name = parameters[1].valueAsText
-        keep_enrich_fields = parameters[2].value
+        all_indices = parameters[2].value
+        keep_enrich_fields = parameters[3].value
+
+        # if adding all values, create a list of indices to add
+        if all_indices:
+            idx_lst = config.meta_variables.keys()
+        else:
+            idx_lst = [index_name]
 
         # add the preconfigured simpsons diversity index to the input features
-        arcgis.add_preconfigured_simpsons_diversity_index_feature_class(features, index_name, keep_enrich_fields)
+        for idx in idx_lst:
+            arcgis.add_preconfigured_simpsons_diversity_index_feature_class(features, idx, keep_enrich_fields)
 
         return

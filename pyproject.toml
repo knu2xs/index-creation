@@ -18,38 +18,8 @@ classifiers = [
 license = {file = "LICENSE"}
 dependencies = [
     "arcgis>=2.0.1",
-    "azure-storage-file",
-    "boto3",
-    "h3",
+    "h3>=4.0.0b2",
     "numpy>=1.7",
-    "openpyxl",
-    "pandas>=1.0.5",
-    "pyarrow>=1.0.0"
-]
-
-[project.optional-dependencies]
-dev = [
-    "arcgis>=2.0.1",
-    "azure-storage-file",
-    "boto3",
-    "h3",
-    "numpy>=1.7",
-    "openpyxl",
     "pandas>=1.0.5",
     "pyarrow>=1.0.0",
-    "bump2version",
-    "jupyterlab",
-    "nodejs",
-    "pytest",
-    "build"
-]
-docs = [
-    "autodocsumm",
-    "nbsphinx",
-    "furo",
-    "sphinx",
-    "sphinx-autobuild",
-    "sphinx-autodoc-typehints",
-    "sphinx-copybutton",
-    "sphinxcontrib-youtube"
 ]
