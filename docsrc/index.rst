@@ -1,5 +1,9 @@
-Simpson Index Documentation
+Index Creation Documentation
 =============================================================================================================
+
+Index Creation is a package enabling much easier creation of a Gini-Simpson Index with ArcGIS Pro. These
+resources include a Python Package and an ArcGIS Pro toolbox calling the functionality from the Python
+Package.
 
 Gini-Simpson Index
 ------------------
@@ -9,7 +13,7 @@ population will be the same. The formula for calculating Simpson's Index (:math:
 
 .. math::
 
-   D = \frac {\displaystyle \sum n_i (n_i - 1)} {N (N - 1)}
+   D = \frac { \sum n_i (n_i - 1)} {N (N - 1)}
 
 :math:`n_i` = count in the category
 
@@ -26,7 +30,7 @@ Consequently, typically Simpson's Index is calculated using the *Gini-Simpson In
 
 .. math::
 
-   D = 1 - \left ( \frac {\displaystyle \sum n_i (n_i - 1)} {N (N - 1)} \right )
+   D = 1 - \left ( \frac { \sum n_i (n_i - 1)} {N (N - 1)} \right )
 
 The Gini-Simpson Index is the implementation in the tooling included with this package.
 
@@ -36,5 +40,5 @@ Contents
 .. toctree::
     :maxdepth: 3
 
-    ArcGIS Pro Toolbox - Simpson Index Toolbox<simpson-index-toolbox>
-    API - Python Package Documentation<api-index-creation>
+    ArcGIS Pro Toolbox<simpson-index-toolbox>
+    API - Python Package<api-index-creation>
